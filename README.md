@@ -1,6 +1,6 @@
 # elf4j-benchmark
 
-JMH bench marks for some Java log engines
+[JMH](https://github.com/openjdk/jmh) based comparisons for some Java log engines
 
 ## log4j
 

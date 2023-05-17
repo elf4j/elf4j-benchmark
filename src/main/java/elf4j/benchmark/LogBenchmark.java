@@ -43,12 +43,15 @@ import java.util.concurrent.TimeUnit;
 
 @State(Scope.Thread)
 //@Warmup(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-//@Measurement(iterations = 3, time = 2, timeUnit = TimeUnit.SECONDS)
-@Threads(200)
+//@Measurement(iterations = 3, time = 3, timeUnit = TimeUnit.SECONDS)
+@Threads(100)
 @BenchmarkMode(Mode.Throughput)
 @Fork(1)
 public class LogBenchmark {
     private static final String PARAM_STRING = "Simple log message with counter: {}";
+    private static final int CPU_TOKENS_PER_OP = 1_000_000;
+    private static final int IO_BLOCK_PER_OP_MICROS = 20_000;
+    private static final boolean NO_WORK_LOAD = false;
     static org.slf4j.Logger logbackLogger = LoggerFactory.getLogger(LogBenchmark.class.getName());
     static org.apache.logging.log4j.Logger log4jLogger = LogManager.getLogger(LogBenchmark.class);
     static Logger elf4jLogger = Logger.instance();
@@ -60,11 +63,11 @@ public class LogBenchmark {
     }
 
     private static void cpu() {
-        Blackhole.consumeCPU(1_000_000);
+        Blackhole.consumeCPU(CPU_TOKENS_PER_OP);
     }
 
     private static void io() {
-        MoreAwaitility.suspend(Duration.of(20, ChronoUnit.MILLIS));
+        MoreAwaitility.suspend(Duration.of(IO_BLOCK_PER_OP_MICROS, ChronoUnit.MICROS));
     }
 
     private static void stopElf4J() {
@@ -83,6 +86,9 @@ public class LogBenchmark {
     }
 
     private static void workload() {
+        if (NO_WORK_LOAD) {
+            return;
+        }
         io();
         cpu();
     }
@@ -100,14 +106,14 @@ public class LogBenchmark {
     }
 
     @Benchmark
-    public void elf4j() {
-        elf4jLogger.atWarn().log(PARAM_STRING, ++i);
+    public void tinylog() {
+        org.tinylog.Logger.warn(PARAM_STRING, ++i);
         workload();
     }
 
     @Benchmark
-    public void tinylog() {
-        org.tinylog.Logger.warn(PARAM_STRING, ++i);
+    public void elf4j() {
+        elf4jLogger.atWarn().log(PARAM_STRING, ++i);
         workload();
     }
 
@@ -117,7 +123,7 @@ public class LogBenchmark {
     }
 
     @TearDown
-    public void stopService() {
+    public void stopAll() {
         stopElf4J();
         stopLogback();
         stopLog4J();

@@ -42,8 +42,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 
 @State(Scope.Thread)
-//@Warmup(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-//@Measurement(iterations = 1, time = 5, timeUnit = TimeUnit.SECONDS)
+@Warmup(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 1, time = 5, timeUnit = TimeUnit.SECONDS)
 @Threads(100)
 @BenchmarkMode(Mode.Throughput)
 @Fork(1)
@@ -52,7 +52,6 @@ public class LogBenchmark {
     private static final String LOG_MESSAGE_END = "Simple log message end with counter: {}";
     private static final int CPU_TOKENS_PER_OP = 1_000_000;
     private static final int IO_BLOCK_PER_OP_MICROS = 20_000;
-    private static final boolean NO_WORK_LOAD = false;
     static org.slf4j.Logger logbackLogger = LoggerFactory.getLogger(LogBenchmark.class.getName());
     static org.apache.logging.log4j.Logger log4jLogger = LogManager.getLogger(LogBenchmark.class);
     static Logger elf4jLogger = Logger.instance();
@@ -72,7 +71,7 @@ public class LogBenchmark {
     }
 
     private static void stopElf4J() {
-        LogServiceManager.INSTANCE.stopAll();
+        LogServiceManager.INSTANCE.stop();
     }
 
     private static void stopLog4J() {
@@ -87,9 +86,6 @@ public class LogBenchmark {
     }
 
     private static void workload() {
-        if (NO_WORK_LOAD) {
-            return;
-        }
         cpu(CPU_TOKENS_PER_OP / 2);
         io(IO_BLOCK_PER_OP_MICROS);
         cpu(CPU_TOKENS_PER_OP / 2);

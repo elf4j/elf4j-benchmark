@@ -43,12 +43,13 @@ import java.util.concurrent.TimeUnit;
 
 @State(Scope.Thread)
 //@Warmup(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-//@Measurement(iterations = 3, time = 3, timeUnit = TimeUnit.SECONDS)
+//@Measurement(iterations = 1, time = 5, timeUnit = TimeUnit.SECONDS)
 @Threads(100)
 @BenchmarkMode(Mode.Throughput)
 @Fork(1)
 public class LogBenchmark {
-    private static final String PARAM_STRING = "Simple log message with counter: {}";
+    private static final String LOG_MESSAGE_START = "Simple log message start with counter: {}";
+    private static final String LOG_MESSAGE_END = "Simple log message end with counter: {}";
     private static final int CPU_TOKENS_PER_OP = 1_000_000;
     private static final int IO_BLOCK_PER_OP_MICROS = 20_000;
     private static final boolean NO_WORK_LOAD = false;
@@ -62,12 +63,12 @@ public class LogBenchmark {
         new Runner(opt).run();
     }
 
-    private static void cpu() {
-        Blackhole.consumeCPU(CPU_TOKENS_PER_OP);
+    private static void cpu(long tokens) {
+        Blackhole.consumeCPU(tokens);
     }
 
-    private static void io() {
-        MoreAwaitility.suspend(Duration.of(IO_BLOCK_PER_OP_MICROS, ChronoUnit.MICROS));
+    private static void io(long blockMicros) {
+        MoreAwaitility.suspend(Duration.of(blockMicros, ChronoUnit.MICROS));
     }
 
     private static void stopElf4J() {
@@ -89,32 +90,41 @@ public class LogBenchmark {
         if (NO_WORK_LOAD) {
             return;
         }
-        io();
-        cpu();
+        cpu(CPU_TOKENS_PER_OP / 2);
+        io(IO_BLOCK_PER_OP_MICROS);
+        cpu(CPU_TOKENS_PER_OP / 2);
     }
 
     @Benchmark
     public void logback() {
-        logbackLogger.warn(PARAM_STRING, ++i);
+        int o = ++i;
+        logbackLogger.warn(LOG_MESSAGE_START, o);
         workload();
+        logbackLogger.warn(LOG_MESSAGE_END, o);
     }
 
     @Benchmark
     public void log4j() {
-        log4jLogger.warn(PARAM_STRING, ++i);
+        int o = ++i;
+        log4jLogger.warn(LOG_MESSAGE_START, o);
         workload();
+        log4jLogger.warn(LOG_MESSAGE_END, o);
     }
 
     @Benchmark
     public void tinylog() {
-        org.tinylog.Logger.warn(PARAM_STRING, ++i);
+        int o = ++i;
+        org.tinylog.Logger.warn(LOG_MESSAGE_START, o);
         workload();
+        org.tinylog.Logger.warn(LOG_MESSAGE_END, o);
     }
 
     @Benchmark
     public void elf4j() {
-        elf4jLogger.atWarn().log(PARAM_STRING, ++i);
+        int o = ++i;
+        elf4jLogger.atWarn().log(LOG_MESSAGE_START, o);
         workload();
+        elf4jLogger.atWarn().log(LOG_MESSAGE_END, o);
     }
 
     @Benchmark

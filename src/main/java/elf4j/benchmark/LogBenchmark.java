@@ -43,13 +43,12 @@ import java.util.concurrent.TimeUnit;
 
 @State(Scope.Thread)
 @Warmup(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 1, time = 5, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 1, time = 3, timeUnit = TimeUnit.SECONDS)
 @Threads(100)
 @BenchmarkMode(Mode.Throughput)
 @Fork(1)
 public class LogBenchmark {
-    private static final String LOG_MESSAGE_START = "Simple log message start with counter: {}";
-    private static final String LOG_MESSAGE_END = "Simple log message end with counter: {}";
+    private static final String LOG_MESSAGE_START = "Simple log message with counter: {}";
     private static final int CPU_TOKENS_PER_OP = 1_000_000;
     private static final int IO_BLOCK_PER_OP_MICROS = 20_000;
     static org.slf4j.Logger logbackLogger = LoggerFactory.getLogger(LogBenchmark.class.getName());
@@ -63,10 +62,16 @@ public class LogBenchmark {
     }
 
     private static void cpu(long tokens) {
+        if (tokens == 0) {
+            return;
+        }
         Blackhole.consumeCPU(tokens);
     }
 
     private static void io(long blockMicros) {
+        if (blockMicros == 0) {
+            return;
+        }
         MoreAwaitility.suspend(Duration.of(blockMicros, ChronoUnit.MICROS));
     }
 
@@ -92,40 +97,46 @@ public class LogBenchmark {
     }
 
     @Benchmark
-    public void logback() {
+    public int logback() {
         int o = ++i;
         logbackLogger.warn(LOG_MESSAGE_START, o);
         workload();
-        logbackLogger.warn(LOG_MESSAGE_END, o);
+        return o;
     }
 
     @Benchmark
-    public void log4j() {
+    public int log4j() {
         int o = ++i;
         log4jLogger.warn(LOG_MESSAGE_START, o);
         workload();
-        log4jLogger.warn(LOG_MESSAGE_END, o);
+        return o;
     }
 
     @Benchmark
-    public void tinylog() {
+    public int tinylog() {
         int o = ++i;
         org.tinylog.Logger.warn(LOG_MESSAGE_START, o);
         workload();
-        org.tinylog.Logger.warn(LOG_MESSAGE_END, o);
+        return o;
     }
 
     @Benchmark
-    public void elf4j() {
+    public int elf4j() {
         int o = ++i;
         elf4jLogger.atWarn().log(LOG_MESSAGE_START, o);
         workload();
-        elf4jLogger.atWarn().log(LOG_MESSAGE_END, o);
+        return o;
     }
 
     @Benchmark
-    public void noLog() {
+    public int noLog() {
         workload();
+        return 0;
+    }
+
+    @Benchmark
+    public int noWorkLoad() {
+        return 0;
     }
 
     @TearDown

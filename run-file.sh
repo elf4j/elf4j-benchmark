@@ -25,3 +25,5 @@
 mvn clean verify &&
 java -jar target/benchmarks.jar | cat >out &&
 tail -100 out
+echo ""
+wc -l out

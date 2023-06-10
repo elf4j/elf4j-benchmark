@@ -36,6 +36,7 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.slf4j.LoggerFactory;
+import org.tinylog.provider.ProviderRegistry;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -88,6 +89,14 @@ public class LogBenchmark {
     private static void stopLogback() {
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         loggerContext.stop();
+    }
+
+    private static void stopTinylog() {
+        try {
+            ProviderRegistry.getLoggingProvider().shutdown();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     private static void workload() {
@@ -144,5 +153,6 @@ public class LogBenchmark {
         stopElf4J();
         stopLogback();
         stopLog4J();
+        stopTinylog();
     }
 }

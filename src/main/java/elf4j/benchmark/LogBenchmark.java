@@ -43,7 +43,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 
 @State(Scope.Thread)
-@Warmup(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
+@Warmup(iterations = 1, time = 200, timeUnit = TimeUnit.MILLISECONDS)
 @Measurement(iterations = 1, time = 3, timeUnit = TimeUnit.SECONDS)
 @Threads(100)
 @BenchmarkMode(Mode.Throughput)
@@ -122,6 +122,17 @@ public class LogBenchmark {
     }
 
     @Benchmark
+    public int noLog() {
+        workload();
+        return 0;
+    }
+
+    @Benchmark
+    public int noWorkLoad() {
+        return 0;
+    }
+
+    @Benchmark
     public int tinylog() {
         int o = ++i;
         org.tinylog.Logger.warn(LOG_MESSAGE_START, o);
@@ -135,17 +146,6 @@ public class LogBenchmark {
         elf4jLogger.atWarn().log(LOG_MESSAGE_START, o);
         workload();
         return o;
-    }
-
-    @Benchmark
-    public int noLog() {
-        workload();
-        return 0;
-    }
-
-    @Benchmark
-    public int noWorkLoad() {
-        return 0;
     }
 
     @TearDown

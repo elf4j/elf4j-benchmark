@@ -25,9 +25,9 @@
 package elf4j.benchmark;
 
 import ch.qos.logback.classic.LoggerContext;
+import coco4j.MoreAwaitilities;
 import elf4j.Logger;
 import elf4j.engine.service.LogServiceManager;
-import elf4j.engine.service.util.MoreAwaitility;
 import org.apache.logging.log4j.LogManager;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
@@ -73,7 +73,7 @@ public class LogBenchmark {
         if (blockMicros == 0) {
             return;
         }
-        MoreAwaitility.suspend(Duration.of(blockMicros, ChronoUnit.MICROS));
+        MoreAwaitilities.suspend(Duration.of(blockMicros, ChronoUnit.MICROS));
     }
 
     private static void stopElf4J() {

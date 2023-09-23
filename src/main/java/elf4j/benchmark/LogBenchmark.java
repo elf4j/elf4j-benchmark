@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 
 @State(Scope.Thread)
 @Warmup(iterations = 1, time = 200, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 1, time = 3, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 2, time = 4, timeUnit = TimeUnit.SECONDS)
 @Threads(100)
 @BenchmarkMode(Mode.Throughput)
 @Fork(1)
@@ -77,7 +77,7 @@ public class LogBenchmark {
     }
 
     private static void stopElf4J() {
-        LogServiceManager.INSTANCE.stop();
+        LogServiceManager.INSTANCE.shutdown();
     }
 
     private static void stopLog4J() {

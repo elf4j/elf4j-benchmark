@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 
 @State(Scope.Thread)
 @Warmup(iterations = 1, time = 200, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 2, time = 4, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 1, time = 5, timeUnit = TimeUnit.SECONDS)
 @Threads(100)
 @BenchmarkMode(Mode.Throughput)
 @Fork(1)
@@ -73,7 +73,7 @@ public class LogBenchmark {
         if (blockMicros == 0) {
             return;
         }
-        MoreAwaitilities.suspend(Duration.of(blockMicros, ChronoUnit.MICROS));
+        MoreAwaitilities.sleepInterruptibly(Duration.of(blockMicros, ChronoUnit.MICROS));
     }
 
     private static void stopElf4J() {

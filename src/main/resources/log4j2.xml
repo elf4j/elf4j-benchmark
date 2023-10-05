@@ -29,13 +29,13 @@
         </Console>
         <Async name="Async">
             <AppenderRef ref="stdout"/>
-<!--            <queueSize>262144</queueSize>-->
+            <!--            <queueSize>262144</queueSize>-->
         </Async>
     </Appenders>
     <Loggers>
         <Root level="info">
-<!--        <Root level="error">-->
-<!--            <AppenderRef ref="stdout"/>-->
+            <!--        <Root level="error">-->
+            <!--            <AppenderRef ref="stdout"/>-->
             <AppenderRef ref="Async"/>
         </Root>
     </Loggers>

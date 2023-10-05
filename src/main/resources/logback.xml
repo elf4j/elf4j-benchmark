@@ -33,7 +33,7 @@
         <appender-ref ref="STDOUT"/>
         <!--        <queueSize>262144</queueSize>-->
     </appender>
-<!--    <root level="error">-->
+    <!--    <root level="error">-->
     <root level="info">
         <!--        <appender-ref ref="STDOUT"/>-->
         <appender-ref ref="ASYNC"/>

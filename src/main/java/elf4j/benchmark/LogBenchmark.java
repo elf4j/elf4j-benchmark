@@ -25,7 +25,6 @@
 package elf4j.benchmark;
 
 import ch.qos.logback.classic.LoggerContext;
-import coco4j.MoreAwaitilities;
 import elf4j.Logger;
 import elf4j.engine.service.LogServiceManager;
 import org.apache.logging.log4j.LogManager;
@@ -41,6 +40,8 @@ import org.tinylog.provider.ProviderRegistry;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
+
+import static coco4j.CocoUtils.sleepInterruptibly;
 
 @State(Scope.Thread)
 @Warmup(iterations = 1, time = 200, timeUnit = TimeUnit.MILLISECONDS)
@@ -73,7 +74,7 @@ public class LogBenchmark {
         if (blockMicros == 0) {
             return;
         }
-        MoreAwaitilities.sleepInterruptibly(Duration.of(blockMicros, ChronoUnit.MICROS));
+        sleepInterruptibly(Duration.of(blockMicros, ChronoUnit.MICROS));
     }
 
     private static void stopElf4J() {
@@ -106,15 +107,18 @@ public class LogBenchmark {
     }
 
     @Benchmark
-    public int logback() {
-        int o = ++i;
-        logbackLogger.warn(LOG_MESSAGE_START, o);
-        workload();
-        return o;
+    public int o1_noWorkLoad() {
+        return 0;
     }
 
     @Benchmark
-    public int log4j() {
+    public int o2_noLog() {
+        workload();
+        return 0;
+    }
+
+    @Benchmark
+    public int o3_log4j() {
         int o = ++i;
         log4jLogger.warn(LOG_MESSAGE_START, o);
         workload();
@@ -122,18 +126,15 @@ public class LogBenchmark {
     }
 
     @Benchmark
-    public int noLog() {
+    public int o4_logback() {
+        int o = ++i;
+        logbackLogger.warn(LOG_MESSAGE_START, o);
         workload();
-        return 0;
+        return o;
     }
 
     @Benchmark
-    public int noWorkLoad() {
-        return 0;
-    }
-
-    @Benchmark
-    public int tinylog() {
+    public int o5_tinylog() {
         int o = ++i;
         org.tinylog.Logger.warn(LOG_MESSAGE_START, o);
         workload();
@@ -141,7 +142,7 @@ public class LogBenchmark {
     }
 
     @Benchmark
-    public int elf4j() {
+    public int o6_elf4j() {
         int o = ++i;
         elf4jLogger.atWarn().log(LOG_MESSAGE_START, o);
         workload();
